@@ -159,7 +159,12 @@ struct audio_policy {
                                    uint32_t samplingRate,
                                    audio_format_t format,
                                    audio_channel_mask_t channelMask,
+#ifdef STE_AUDIO
+                                   audio_in_acoustics_t acoustics,
+                                   audio_input_clients *inputClientId);
+#else
                                    audio_in_acoustics_t acoustics);
+#endif
 
     /* indicates to the audio policy manager that the input starts being used */
     int (*start_input)(struct audio_policy *pol, audio_io_handle_t input);
@@ -192,6 +197,7 @@ struct audio_policy {
                                    audio_stream_type_t stream,
                                    int *index);
 
+#ifndef ICS_AUDIO_BLOB
     /* sets the new stream volume at a level corresponding to the supplied
      * index for the specified device.
      * The index is within the range specified by init_stream_volume() */
@@ -205,6 +211,7 @@ struct audio_policy {
                                    audio_stream_type_t stream,
                                    int *index,
                                    audio_devices_t device);
+#endif
 
     /* return the strategy corresponding to a given stream type */
     uint32_t (*get_strategy_for_stream)(const struct audio_policy *pol,
@@ -232,13 +239,16 @@ struct audio_policy {
     bool (*is_stream_active)(const struct audio_policy *pol,
             audio_stream_type_t stream,
             uint32_t in_past_ms);
-
+#ifndef ICS_AUDIO_BLOB
+#ifndef MR1_AUDIO_BLOB
     bool (*is_stream_active_remotely)(const struct audio_policy *pol,
             audio_stream_type_t stream,
             uint32_t in_past_ms);
+#endif
 
     bool (*is_source_active)(const struct audio_policy *pol,
             audio_source_t source);
+#endif
 
     /* dump state */
     int (*dump)(const struct audio_policy *pol, int fd);
@@ -312,10 +322,19 @@ struct audio_policy_service_ops {
                                     uint32_t *pSamplingRate,
                                     audio_format_t *pFormat,
                                     audio_channel_mask_t *pChannelMask,
+#ifdef STE_AUDIO
+                                    audio_in_acoustics_t acoustics,
+                                    audio_input_clients *pInputClientId);
+
+    /* closes an audio input */
+    int (*close_input)(void *service, audio_io_handle_t input,
+                        audio_input_clients *inputClientId);
+#else
                                     audio_in_acoustics_t acoustics);
 
     /* closes an audio input */
     int (*close_input)(void *service, audio_io_handle_t input);
+#endif
 
     /* */
     /* misc control functions */
@@ -408,7 +427,12 @@ struct audio_policy_service_ops {
                                     audio_devices_t *pDevices,
                                     uint32_t *pSamplingRate,
                                     audio_format_t *pFormat,
+#ifdef STE_AUDIO
+                                    audio_channel_mask_t *pChannelMask,
+                                    audio_input_clients *pInputClientId);
+#else
                                     audio_channel_mask_t *pChannelMask);
+#endif
 
 };
 
